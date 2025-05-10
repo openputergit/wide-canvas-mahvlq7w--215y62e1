@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Purchase & Sales Management</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css" rel="stylesheet">
+    <style>
+        .clay-effect {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 20px;
+            box-shadow: 
+                20px 20px 60px #bebebe,
+                -20px -20px 60px #ffffff;
+            backdrop-filter: blur(5px);
+            transition: transform 0.2s;
+        }
+        .clay-effect:hover {
+            transform: scale(1.02);
+        }
+        body {
+            background-color: #e0e5ec;
+        }
+        .clay-button {
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 12px;
+            box-shadow: 
+                8px 8px 16px #bebebe,
+                -8px -8px 16px #ffffff;
+            transition: all 0.2s ease;
+        }
+        .clay-button:hover {
+            box-shadow: 
+                4px 4px 8px #bebebe,
+                -4px -4px 8px #ffffff;
+            transform: translateY(2px);
+        }
+        .back-button {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+        }
+    </style>
+</head>
+<body class="min-h-screen p-4 md:p-8">
+    <div class="max-w-4xl mx-auto">
+        <!-- Back Button (shows only on forms) -->
+        <button id="backButton" onclick="goBack()" class="back-button clay-button p-3 hidden">
+            <i class="bi bi-arrow-left text-gray-800"></i> Back
+        </button>
+
+        <!-- Main Options -->
+        <div id="mainOptions" class="grid grid-cols-1 md:grid-cols-2 gap-8 mb-8">
+            <div class="clay-effect p-8 text-center cursor-pointer" onclick="showForm('purchase')">
+                <i class="bi bi-cart-plus text-6xl text-blue-600"></i>
+                <h2 class="mt-4 text-2xl font-bold text-gray-800">Purchase</h2>
+            </div>
+            <div class="clay-effect p-8 text-center cursor-pointer" onclick="showForm('sales')">
+                <i class="bi bi-shop text-6xl text-green-600"></i>
+                <h2 class="mt-4 text-2xl font-bold text-gray-800">Sales</h2>
+            </div>
+        </div>
+
+        <!-- Download Button -->
+        <div id="downloadSection" class="mt-6 text-center">
+            <button onclick="downloadData()" class="clay-button px-6 py-3 text-purple-600 font-bold">
+                <i class="bi bi-download me-2"></i> Download Data
+            </button>
+        </div>
+
+        <!-- Purchase Form -->
+        <div id="purchaseForm" class="clay-effect p-8 mt-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Purchase Entry</h2>
+            <form id="purchaseFormData" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="date" name="date" class="clay-effect p-3 w-full" required>
+                    <input type="text" name="product" placeholder="Product Name" class="clay-effect p-3 w-full" required>
+                    <input type="number" name="quantity" placeholder="Quantity" class="clay-effect p-3 w-full" required>
+                    <input type="number" name="amount" placeholder="Amount" class="clay-effect p-3 w-full" required>
+                </div>
+                <button type="submit" class="clay-button px-6 py-3 w-full text-blue-600 font-bold">Submit</button>
+            </form>
+            <div id="totalPurchase" class="mt-6 text-xl font-bold text-center hidden">
+                Total Purchase: ₹<span id="purchaseAmount">0</span>
+            </div>
+        </div>
+
+        <!-- Sales Form -->
+        <div id="salesForm" class="clay-effect p-8 mt-8 hidden">
+            <h2 class="text-2xl font-bold text-gray-800 mb-6">Sales Entry</h2>
+            <form id="salesFormData" class="space-y-4">
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <input type="date" name="date" class="clay-effect p-3 w-full" required>
+                    <input type="text" name="product" placeholder="Product Name" class="clay-effect p-3 w-full" required>
+                    <input type="number" name="quantity" placeholder="Quantity" class="clay-effect p-3 w-full" required>
+                    <input type="number" name="amount" placeholder="Amount" class="clay-effect p-3 w-full" required>
+                    <input type="text" name="billNo" placeholder="Bill No." class="clay-effect p-3 w-full" required>
+                    <select name="paymentMode" class="clay-effect p-3 w-full" required>
+                        <option value="">Select Payment Mode</option>
+                        <option value="cash">Cash</option>
+                        <option value="online">Online</option>
+                        <option value="due">Due</option>
+                    </select>
+                </div>
+                <button type="submit" class="clay-button px-6 py-3 w-full text-green-600 font-bold">Submit</button>
+            </form>
+            <div id="totalSales" class="mt-6 text-xl font-bold text-center hidden">
+                Total Sales: ₹<span id="salesAmount">0</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Store data for download
+        let purchaseData = [];
+        let salesData = [];
+        
+        function showForm(type) {
+            document.getElementById('mainOptions').classList.add('hidden');
+            document.getElementById('downloadSection').classList.add('hidden');
+            document.getElementById('backButton').classList.remove('hidden');
+            
+            if(type === 'purchase') {
+                document.getElementById('purchaseForm').classList.remove('hidden');
+                document.getElementById('salesForm').classList.add('hidden');
+            } else {
+                document.getElementById('purchaseForm').classList.add('hidden');
+                document.getElementById('salesForm').classList.remove('hidden');
+            }
+        }
+        
+        function goBack() {
+            document.getElementById('mainOptions').classList.remove('hidden');
+            document.getElementById('downloadSection').classList.remove('hidden');
+            document.getElementById('purchaseForm').classList.add('hidden');
+            document.getElementById('salesForm').classList.add('hidden');
+            document.getElementById('backButton').classList.add('hidden');
+            document.getElementById('totalPurchase').classList.add('hidden');
+            document.getElementById('totalSales').classList.add('hidden');
+        }
+
+        document.getElementById('purchaseFormData').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const amount = formData.get('amount');
+            
+            // Create data object
+            const data = {
+                date: formData.get('date'),
+                product: formData.get('product'),
+                quantity: formData.get('quantity'),
+                amount: amount
+            };
+            
+            // Add to purchase data
+            purchaseData.push(data);
+            
+            // Show total
+            document.getElementById('purchaseAmount').textContent = amount;
+            document.getElementById('totalPurchase').classList.remove('hidden');
+            
+            // Reset form
+            this.reset();
+        });
+
+        document.getElementById('salesFormData').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const formData = new FormData(this);
+            const amount = formData.get('amount');
+            
+            // Create data object
+            const data = {
+                date: formData.get('date'),
+                product: formData.get('product'),
+                quantity: formData.get('quantity'),
+                amount: amount,
+                billNo: formData.get('billNo'),
+                paymentMode: formData.get('paymentMode')
+            };
+            
+            // Add to sales data
+            salesData.push(data);
+            
+            // Show total
+            document.getElementById('salesAmount').textContent = amount;
+            document.getElementById('totalSales').classList.remove('hidden');
+            
+            // Reset form
+            this.reset();
+        });
+        
+        function downloadData() {
+            // Create a combined data object
+            const dataToExport = {
+                purchases: purchaseData,
+                sales: salesData
+            };
+            
+            // Convert to JSON
+            const jsonData = JSON.stringify(dataToExport, null, 2);
+            
+            // Create download link
+            const blob = new Blob([jsonData], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            
+            // Create download element
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'purchase_sales_data.json';
+            a.click();
+            
+            // Clean up
+            URL.revokeObjectURL(url);
+        }
+    </script>
+<script>document.body.addEventListener('wheel', e => { if (!e.ctrlKey) return; e.preventDefault(); return }, { passive: false })</script>
+	</body>
+</html>
